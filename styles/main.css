@@ -1,0 +1,150 @@
+* {
+  margin:0;
+  padding:0;
+  outline:none;
+}
+
+body {
+  background-color:#434343;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.wrapper header h1 {
+  text-align:center;
+}
+
+ul {
+  list-style-type:none;
+}
+
+.profile {
+  float:left;
+  margin-left:20px;
+}
+
+.player {
+  padding:10px;
+  cursor:pointer;
+}
+
+.player:hover {
+  background-color:teal;
+  color:white;
+}
+
+.player img {
+  float:left;
+  border:1px solid gray;
+  margin-right:5px;
+}
+
+.player ul {
+  float:left;
+}
+
+.player ul li {
+  line-height:16px;
+}
+
+#player-listing {
+  border:1px solid gray;
+  width:285px;
+  float:right;
+  border-radius:5px;
+}
+
+#player-select {
+  float:left;
+  width: 500px;
+  height:300px;
+  margin:0 0 20px 20px;
+}
+
+.wrapper {
+  width:80%;
+  height:700px;
+  background-color:white;
+  margin:20px auto;
+}
+
+.listing {
+  float:right;
+  margin-right:20px;
+}
+
+.rounded-left {
+  border-radius:5px 0 0 5px;
+}
+
+.rounded-right {
+  border-radius:0 5px 5px 0;
+}
+
+#search-bar {
+  margin-bottom:10px;
+}
+
+.search {
+  background:url('../images/search_icon.png') 2px center no-repeat;
+  width:80px;
+  text-align:right;
+  padding-right:5px;
+  height:31px;
+  border:1px solid gray;
+  border-left:1px solid gray;
+  vertical-align:bottom;
+  cursor:pointer;
+}
+
+.input-search {
+  width:200px;
+  height:29px;
+  border:1px solid gray;
+  border-right:none;
+  padding-left:5px;
+}
+
+.cf:before, .cf:after {
+  content: " "; 
+  display: table;
+}
+
+.cf:after { clear: both; }
+
+.cf { *zoom: 1; }
+
+.hidden {
+  display:none;
+}
+
+span.vote-text {
+  float:left;
+  font-size:30px;
+  color:gray;
+  transition:color 0.5s ease;
+}
+
+button.vote-img {
+  background:url('../images/vote.png') 2px center no-repeat;
+  text-align:right;
+  width:320px;
+  font-size:30px;
+  line-height:50px;
+  border:none;
+  padding:0;
+  color:gray;
+  transition:color 0.3s, background-color 0.3s ease;
+  cursor:pointer;
+}
+
+button.vote-img:hover {
+  color:white;
+  background-color:#434343;
+}
+
+.no-results {
+  text-align:center;
+}
+
+
+

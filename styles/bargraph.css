@@ -1,0 +1,26 @@
+.barSection {
+  width:400px;
+}
+
+.barSection header {
+  text-align:center;
+}
+
+.barGraph {
+  margin:0 auto;
+  width:320px;
+  height:300px;  
+  position:relative;
+}
+
+.bar {
+  background:-webkit-linear-gradient(left, teal, #434343);
+  background:-webkit-linear-gradient(right, teal, #434343);
+  background:-webkit-linear-gradient(right, teal, #434343);
+  background:linear-gradient(to right, teal, #434343);
+  border-radius:5px 5px 0 0;
+  width:30px;
+  float:left;
+  position:absolute;
+  bottom:0;
+}

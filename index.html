@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <title>Page Title</title>
+  <meta charset='utf-8' />
+  <meta name='viewport' content='width=device-width,initial-scale=1.0' />
+  <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1' />
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link rel='stylesheet' href='./styles/main.css' />
+  <link rel='stylesheet' href='./styles/bargraph.css' />
+</head>
+<body>
+<div class='wrapper'>
+  
+  <header><h1>Chess GrandMasters</h1></header>
+  <div id='player-select'></div>
+  
+  <div class='listing'>
+    <div id='search-bar'>
+      <input type='text' id='search-field' class='input-search rounded-left' /><button class='search rounded-right'>Search</button>
+    </div>
+    <div id='player-listing'></div>
+  </div>
+  
+  <div class='barSection hidden'>
+    <header><h1>Chess GM Poll Results</h1></header>
+    <div class='barGraph cf'></div>
+  </div>
+</div>
+
+<!---------------------- Backbone.js Templates --------------------->
+<script id='selectTemplate' type='text/template'>
+<img src='<%= imgSrc %>' alt='<%= name %>' />
+<ul> 
+  <li><strong>Name: </strong><%= name %></li>
+  <li><strong>Birthdate: </strong><%= birthdate %></li>
+  <li><strong>Country: </strong><%= country %></li>
+  <li><strong>Highest Rating: </strong><%= rating %></li>
+  <li id='votes'><strong>Votes: </strong><%= votes %></li>
+</ul>
+  <footer>
+    <button class='vote-img'>Greatest of all time?</button>
+    <span class='vote-text'></span>
+  </footer>  
+</script>
+
+<script id='playerTemplate' type='text/template'>
+  <img src='<%= countrySrc %>' alt='<%= name %>' />
+  <ul>
+    <li><span><%= name %></span></li>
+    <li><%= country %></li>
+  </ul>
+</script>
+
+<!------------------------ Javascript ----------------------------->
+<script src='http://underscorejs.org/underscore.js'></script>
+<script src='http://code.jquery.com/jquery.js'></script>
+<script src='http://backbonejs.org/backbone.js'></script>
+<script src='./js/data.js'></script>
+<script src='./js/bargraph.js'></script>
+<script>
+var App = {
+  Models: {},
+  Views: {},
+  Collections: {},
+  init: function() {
+    this.players = new App.Views.Players();  
+  }
+};
+
+App.Models.Player = Backbone.Model.extend({
+  defaults: {
+    imgSrc: './images/placeholder.jpg',
+    countrySrc: './images/country.png',
+    name: 'John Doe',
+    birthdate: 'January 1, 1990',
+    country: 'Canada',
+    rating: 2500,
+    votes: 10
+  }
+});
+
+App.Collections.Players = Backbone.Collection.extend({
+  model: App.Models.Player
+});
+
+App.Views.PlayerSelect = Backbone.View.extend({
+  tagName: 'div',
+  className: '',
+  template: _.template($('#selectTemplate').html()),
+  
+  initialize: function() {
+    this.on('showResults', this.showResults);
+    this.on('updateVote', this.updateVote);
+    this.on('renderVote', this.renderVote);
+    this.render();
+  },
+  
+  events: {
+    'click button.vote-img': 'buttonHandler'
+  },
+  
+  buttonHandler: function() {
+    this.trigger('updateVote');
+    this.trigger('showResults');
+  },
+  
+  updateVote: function() {
+    var votes = this.model.get('votes');
+    this.model.set('votes', votes + 1);
+    this.trigger('renderVote');    
+  },
+  
+  renderVote: function() {
+    var votes = this.model.get('votes');
+    this.$el.find('#votes').html('<strong>Votes: </strong>' + votes);
+  },
+  
+  showResults: function() {
+    $('.barSection').fadeIn('fast').find('.barGraph').empty();    
+    Graph(this.getData())();
+  },
+  
+  getData: function() {
+    var data = {votes: [], names: []};
+    App.players.collection.map(function(playerModel, idx, list) {
+      data.votes.push(playerModel.get('votes'));
+      data.names.push(playerModel.get('name'));
+    });
+    return data;
+  },
+  
+  render: function() {
+    $('#player-select div').detach();
+    this.$el.html(this.template(this.model.toJSON()));
+    $('#player-select').append(this.el); 
+  }
+});
+
+App.Views.Select = Backbone.View.extend({
+  el: '#search-bar',
+  
+  events: {
+    'keyup #search-field': 'setFilter'
+  },
+  
+  setFilter: function(e) {
+    this.trigger('searchFilter', e.target.value);
+  }
+})
+
+App.Views.Player = Backbone.View.extend({
+  tagName: 'div',
+  
+  className: 'player cf',
+  
+  template: _.template($('#playerTemplate').html()),
+  
+  events: {
+    'click': 'show'
+  },
+  
+  show: function(e) {
+    new App.Views.PlayerSelect({model: this.model});
+  },
+  
+  render: function() {
+    this.$el.html(this.template(this.model.toJSON()));
+    return this;
+  }  
+});
+
+App.Views.Players = Backbone.View.extend({
+  el: $('#player-listing'),
+  
+  extViewSelect: new App.Views.Select(),
+  
+  className: 'listing',
+  
+  initialize: function() {
+    this.collection = new App.Collections.Players(playerData);
+    new App.Views.PlayerSelect({model: this.collection.models[0]});
+    this.render();
+    this.listenTo(this.extViewSelect, 'searchFilter', this.searchFilter);
+    
+    this.on('change:searchFilter', this.filterBySearch, this);
+    this.collection.on('reset',this.render,this);
+    
+  },
+  
+  filterBySearch: function() {
+    this.collection.reset(playerData, {silent:true}); // Necessary for backspace, but no event trigger
+    var filtered = this.collection.filter(function(model) {
+      return model.get('name').toLowerCase().indexOf(this.searchFilter) !== -1;
+    }, this);
+    this.collection.reset(filtered);
+  },
+  
+  searchFilter: function(data) {
+    this.searchFilter = data.toLowerCase();
+    this.trigger('change:searchFilter');
+  },
+  
+  render: function() {
+    this.$el.empty();
+    
+    if(this.collection.length === 0)
+      this.$el.append('<h4 class="no-results">Sorry, no results found</h4>');
+    else {
+      this.collection.each(function(player) {
+        var playerView = new App.Views.Player({model: player});
+        this.$el.append(playerView.render().el)
+      }, this);
+    }
+  }
+});
+
+App.init();
+</script>
+</body>
+</html>
